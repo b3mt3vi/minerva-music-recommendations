@@ -12,8 +12,9 @@ def build_annoy_index():
     # Load processed data
     combined_df = pd.read_csv('data/processed/processed_data.csv')
 
-    # Extract features for Annoy (example: just using listeners and playcount)
-    features = combined_df[['listeners', 'playcount']].values
+    # Extract features for Annoy (example: using listeners, playcount, and a few others if available)
+    feature_columns = ['listeners', 'playcount']
+    features = combined_df[feature_columns].fillna(0).values
     num_features = features.shape[1]
 
     # Initialize Annoy index
@@ -30,7 +31,8 @@ def build_annoy_index():
 def generate_annoy_recommendations(item_id, num_recommendations=10):
     # Load the Annoy index
     combined_df = pd.read_csv('data/processed/processed_data.csv')
-    num_features = 2  # Adjust to the actual number of features used in build_annoy_index
+    feature_columns = ['listeners', 'playcount']
+    num_features = len(feature_columns)
 
     index = AnnoyIndex(num_features, 'angular')
     index.load('models/annoy_index.ann')

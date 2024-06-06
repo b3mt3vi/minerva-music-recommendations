@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
+# Load environment variables from .env file
 load_dotenv()
 
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
@@ -24,6 +24,9 @@ def collect_lastfm_data(artist_name):
     url = f"http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist={artist_name}&api_key={LASTFM_API_KEY}&format=json"
     response = requests.get(url)
     data = response.json()
+    if 'artist' not in data:
+        print(f"No data found for {artist_name} on Last.fm.")
+        return None
     artist_data = {
         'name': data['artist']['name'],
         'listeners': data['artist']['stats']['listeners'],
@@ -34,6 +37,9 @@ def collect_lastfm_data(artist_name):
 
 def collect_musicbrainz_data(artist_name):
     result = musicbrainzngs.search_artists(artist=artist_name)
+    if not result['artist-list']:
+        print(f"No data found for {artist_name} on MusicBrainz.")
+        return []
     artist_id = result['artist-list'][0]['id']
     
     # Get artist's releases
@@ -49,6 +55,9 @@ def collect_musicbrainz_data(artist_name):
 
 def collect_spotify_data(artist_name):
     results = sp.search(q='artist:' + artist_name, type='artist')
+    if not results['artists']['items']:
+        print(f"No data found for {artist_name} on Spotify.")
+        return []
     artist = results['artists']['items'][0]
     artist_id = artist['id']
     
@@ -64,23 +73,32 @@ def collect_spotify_data(artist_name):
         })
     return album_data
 
-def collect_data():
-    artist_name = 'Radiohead'  # Example artist
+def collect_data(artist_name):
     print(f"Collecting data for {artist_name}...")
     
     lastfm_data = collect_lastfm_data(artist_name)
     musicbrainz_data = collect_musicbrainz_data(artist_name)
     spotify_data = collect_spotify_data(artist_name)
     
-    # Save data to CSV files
-    lastfm_df = pd.DataFrame([lastfm_data])
-    musicbrainz_df = pd.DataFrame(musicbrainz_data)
-    spotify_df = pd.DataFrame(spotify_data)
+    # Save data to CSV files only if data is not None or empty
+    if lastfm_data:
+        lastfm_df = pd.DataFrame([lastfm_data])
+        lastfm_df.to_csv('data/raw/lastfm_data.csv', index=False)
     
-    lastfm_df.to_csv('data/raw/lastfm_data.csv', index=False)
-    musicbrainz_df.to_csv('data/raw/musicbrainz_data.csv', index=False)
-    spotify_df.to_csv('data/raw/spotify_data.csv', index=False)
+    if musicbrainz_data:
+        musicbrainz_df = pd.DataFrame(musicbrainz_data)
+        musicbrainz_df.to_csv('data/raw/musicbrainz_data.csv', index=False)
+    
+    if spotify_data:
+        spotify_df = pd.DataFrame(spotify_data)
+        spotify_df.to_csv('data/raw/spotify_data.csv', index=False)
 
 if __name__ == "__main__":
-    collect_data()
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Collect data for an artist")
+    parser.add_argument("artist_name", type=str, help="Name of the artist to collect data for")
+    args = parser.parse_args()
+    
+    collect_data(args.artist_name)
 
