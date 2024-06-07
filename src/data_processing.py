@@ -12,9 +12,16 @@ def process_data():
     # Merge datasets
     combined_df = pd.concat([lastfm_df, musicbrainz_df, spotify_df], axis=1)
     
-    # Extract features and scale them
-    feature_columns = ['listeners', 'playcount']
-    combined_df[feature_columns] = combined_df[feature_columns].fillna(0)  # Fill NaN with 0
+    # Handle missing values
+    combined_df.fillna(0, inplace=True)
+    
+    # Ensure columns exist
+    feature_columns = ['listeners', 'playcount', 'danceability', 'energy', 'valence']
+    for col in feature_columns:
+        if col not in combined_df:
+            combined_df[col] = 0
+    
+    # Extract and scale features
     scaler = StandardScaler()
     combined_df[feature_columns] = scaler.fit_transform(combined_df[feature_columns])
     

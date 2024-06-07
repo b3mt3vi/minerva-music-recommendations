@@ -65,13 +65,30 @@ def collect_spotify_data(artist_name):
     albums = sp.artist_albums(artist_id, album_type='album')
     album_data = []
     for album in albums['items']:
+        album_id = album['id']
+        album_features = sp.audio_features(album_id)
+        
+        # Check if album_features is not None and has data
+        if album_features and album_features[0]:
+            danceability = album_features[0].get('danceability', 0)
+            energy = album_features[0].get('energy', 0)
+            valence = album_features[0].get('valence', 0)
+        else:
+            danceability = 0
+            energy = 0
+            valence = 0
+        
         album_data.append({
             'album_name': album['name'],
             'release_date': album['release_date'],
             'total_tracks': album['total_tracks'],
-            'spotify_url': album['external_urls']['spotify']
+            'spotify_url': album['external_urls']['spotify'],
+            'danceability': danceability,
+            'energy': energy,
+            'valence': valence
         })
     return album_data
+
 
 def collect_data(artist_name):
     print(f"Collecting data for {artist_name}...")
