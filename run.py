@@ -1,7 +1,7 @@
 import argparse
 from src.data_collection import collect_data
 from src.data_processing import process_data
-from src.recommendation import build_annoy_index, generate_annoy_recommendations
+from src.recommendation import build_annoy_index, get_recommendations
 
 def main(artist_name, num_recommendations):
     print(f"Starting data collection for {artist_name}...")
@@ -14,8 +14,7 @@ def main(artist_name, num_recommendations):
     build_annoy_index()
 
     print(f"Generating {num_recommendations} recommendations for {artist_name}...")
-    recommendations = generate_annoy_recommendations(item_id=0, num_recommendations=num_recommendations)  # Example item_id
-    print("Recommendations:\n", recommendations)
+    get_recommendations(artist_name, num_recommendations)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Music Recommendation System")

@@ -16,7 +16,7 @@ def process_data():
     combined_df.fillna(0, inplace=True)
     
     # Ensure columns exist
-    feature_columns = ['listeners', 'playcount', 'danceability', 'energy', 'valence']
+    feature_columns = ['listeners', 'playcount', 'danceability', 'energy', 'valence', 'popularity', 'tempo', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
     for col in feature_columns:
         if col not in combined_df:
             combined_df[col] = 0

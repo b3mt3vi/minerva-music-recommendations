@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
+# Load environment variables
 load_dotenv()
 
 LASTFM_API_KEY = os.getenv('LASTFM_API_KEY')
@@ -73,10 +73,20 @@ def collect_spotify_data(artist_name):
             danceability = album_features[0].get('danceability', 0)
             energy = album_features[0].get('energy', 0)
             valence = album_features[0].get('valence', 0)
+            tempo = album_features[0].get('tempo', 0)
+            acousticness = album_features[0].get('acousticness', 0)
+            instrumentalness = album_features[0].get('instrumentalness', 0)
+            liveness = album_features[0].get('liveness', 0)
+            speechiness = album_features[0].get('speechiness', 0)
         else:
             danceability = 0
             energy = 0
             valence = 0
+            tempo = 0
+            acousticness = 0
+            instrumentalness = 0
+            liveness = 0
+            speechiness = 0
         
         album_data.append({
             'album_name': album['name'],
@@ -85,10 +95,16 @@ def collect_spotify_data(artist_name):
             'spotify_url': album['external_urls']['spotify'],
             'danceability': danceability,
             'energy': energy,
-            'valence': valence
+            'valence': valence,
+            'tempo': tempo,
+            'acousticness': acousticness,
+            'instrumentalness': instrumentalness,
+            'liveness': liveness,
+            'speechiness': speechiness,
+            'popularity': album.get('popularity', 0),
+            'genre': ", ".join(artist.get('genres', []))
         })
     return album_data
-
 
 def collect_data(artist_name):
     print(f"Collecting data for {artist_name}...")
